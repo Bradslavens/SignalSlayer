@@ -13,17 +13,9 @@ const TRAIN_WIDTH = 50;
 const TRAIN_HEIGHT = 50;
 const TRAIN_Y = canvas.height - 100;
 
-// Signal data
-const correctSignals = [
-  'Clear', 'Approach', 'Stop', 'Advance', 'Restricting',
-  'Diverging Clear', 'Diverging Approach', 'Diverging Restricting',
-  'Limited Clear', 'Medium Approach'
-];
-const incorrectSignals = [
-  'Yield', 'Caution', 'Go', 'Slow', 'Fast', 'Wait', 'Proceed', 'Block',
-  'Hold', 'Pass', 'Alert', 'Warning', 'Danger', 'Safe', 'Track Out',
-  'No Entry', 'Reverse', 'Forward', 'Left', 'Right'
-];
+// Import signal arrays from separate files
+import { correctSignals } from './correctSignals.js';
+import { incorrectSignals } from './incorrectSignals.js';
 
 // Game state
 let signalRows = [];
