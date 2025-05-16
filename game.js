@@ -264,6 +264,64 @@ function handleMouseDown(e) {
   }
 }
 
+// Add on-screen arrow buttons for mobile controls
+function createMobileControls() {
+  const controls = document.createElement('div');
+  controls.id = 'mobile-controls';
+  controls.style.position = 'absolute';
+  controls.style.bottom = '40px';
+  controls.style.left = '50%';
+  controls.style.transform = 'translateX(-50%)';
+  controls.style.display = 'flex';
+  controls.style.gap = '40px';
+  controls.style.zIndex = 20;
+
+  const leftBtn = document.createElement('button');
+  leftBtn.innerHTML = '◀️';
+  leftBtn.style.fontSize = '40px';
+  leftBtn.style.width = '70px';
+  leftBtn.style.height = '70px';
+  leftBtn.style.borderRadius = '50%';
+  leftBtn.style.border = '2px solid #888';
+  leftBtn.style.background = '#fff';
+  leftBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+  leftBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (playerTrack > 0 && !gameOver) playerTrack--;
+  });
+  leftBtn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    if (playerTrack > 0 && !gameOver) playerTrack--;
+  });
+
+  const rightBtn = document.createElement('button');
+  rightBtn.innerHTML = '▶️';
+  rightBtn.style.fontSize = '40px';
+  rightBtn.style.width = '70px';
+  rightBtn.style.height = '70px';
+  rightBtn.style.borderRadius = '50%';
+  rightBtn.style.border = '2px solid #888';
+  rightBtn.style.background = '#fff';
+  rightBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+  rightBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (playerTrack < TRACKS - 1 && !gameOver) playerTrack++;
+  });
+  rightBtn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    if (playerTrack < TRACKS - 1 && !gameOver) playerTrack++;
+  });
+
+  controls.appendChild(leftBtn);
+  controls.appendChild(rightBtn);
+  document.body.appendChild(controls);
+}
+
+// Only show mobile controls if on a touch device
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  createMobileControls();
+}
+
 // Responsive canvas for mobile
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
