@@ -112,9 +112,9 @@ function drawGameOver() {
   ctx.fillStyle = '#fff';
   ctx.font = '36px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20);
+  ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
   ctx.font = '24px sans-serif';
-  ctx.fillText('Press Space to Restart', canvas.width / 2, canvas.height / 2 + 30);
+  ctx.fillText('Tap to Restart', canvas.width / 2, canvas.height / 2 + 10);
 }
 
 function update() {
@@ -169,7 +169,7 @@ function gameLoop() {
 
 // Controls
 window.addEventListener('keydown', e => {
-  if (gameOver && e.code === 'Space') {
+  if (gameOver && (e.code === 'Enter' || e.code === 'NumpadEnter')) {
     resetGame();
     return;
   }
@@ -179,6 +179,64 @@ window.addEventListener('keydown', e => {
     playerTrack++;
   }
 });
+
+// Touch controls for mobile
+canvas.addEventListener('touchstart', handleTouchStart, false);
+canvas.addEventListener('touchend', handleTouchEnd, false);
+canvas.addEventListener('mousedown', handleMouseDown, false);
+let touchStartX = null;
+
+function handleTouchStart(e) {
+  if (gameOver) {
+    resetGame();
+    return;
+  }
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+  }
+}
+
+function handleTouchEnd(e) {
+  if (touchStartX === null || gameOver) return;
+  const touchEndX = e.changedTouches[0].clientX;
+  const dx = touchEndX - touchStartX;
+  if (Math.abs(dx) > 30) {
+    if (dx < 0 && playerTrack > 0) {
+      playerTrack--;
+    } else if (dx > 0 && playerTrack < TRACKS - 1) {
+      playerTrack++;
+    }
+  }
+  touchStartX = null;
+}
+
+function handleMouseDown(e) {
+  if (gameOver) {
+    resetGame();
+    return;
+  }
+}
+
+// Responsive canvas for mobile
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  // Maintain aspect ratio (3:4)
+  if (width / height > 0.75) {
+    width = height * 0.75;
+  } else {
+    height = width / 0.75;
+  }
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
 resetGame();
 gameLoop();
