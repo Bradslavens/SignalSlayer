@@ -18,15 +18,49 @@ import { correctSignals } from './correctSignals.js';
 import { incorrectSignals } from './incorrectSignals.js';
 
 // Game state
+let selectedLine = null;
 let signalRows = [];
 let playerTrack = 1; // 0=left, 1=center, 2=right
 let gameOver = false;
 let score = 0;
 let currentCorrectIndex = 0;
+let currentLineSignals = [];
+
+function showLineSelector() {
+  let selector = document.createElement('select');
+  selector.id = 'lineSelector';
+  selector.style.position = 'absolute';
+  selector.style.top = '20px';
+  selector.style.left = '50%';
+  selector.style.transform = 'translateX(-50%)';
+  selector.style.fontSize = '24px';
+  selector.style.zIndex = 10;
+  let defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.text = 'Select Rail Line...';
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  selector.appendChild(defaultOption);
+  Object.keys(correctSignals).forEach(line => {
+    let opt = document.createElement('option');
+    opt.value = line;
+    opt.text = line;
+    selector.appendChild(opt);
+  });
+  document.body.appendChild(selector);
+  selector.addEventListener('change', e => {
+    selectedLine = selector.value;
+    currentLineSignals = correctSignals[selectedLine];
+    currentCorrectIndex = 0;
+    resetGame();
+    selector.style.display = 'none';
+  });
+}
 
 function randomSignalRow() {
-  // The correct signal is always the current one in order
-  const correct = correctSignals[currentCorrectIndex];
+  if (!selectedLine) return { signals: [], y: -SIGNAL_HEIGHT };
+  // The correct signal is always the current one in order for the selected line
+  const correct = currentLineSignals[currentCorrectIndex];
   // Pick 2 random incorrect signals (not the correct one)
   let incorrects = [];
   while (incorrects.length < 2) {
@@ -51,6 +85,7 @@ function randomSignalRow() {
 }
 
 function resetGame() {
+  if (!selectedLine) return;
   currentCorrectIndex = 0;
   signalRows = [randomSignalRow()];
   playerTrack = 1;
@@ -113,6 +148,7 @@ function drawGameOver() {
 }
 
 function update() {
+  if (!selectedLine) return;
   if (gameOver) return;
   // Move signal rows down
   signalRows.forEach(row => row.y += SIGNAL_SPEED);
@@ -154,6 +190,13 @@ function draw() {
   ctx.fillStyle = '#b3e0ff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawTracks();
+  if (!selectedLine) {
+    ctx.fillStyle = '#222';
+    ctx.font = '32px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Select a Rail Line to Start', canvas.width / 2, canvas.height / 2);
+    return;
+  }
   signalRows.forEach(drawSignalRow);
   drawTrain();
   drawScore();
@@ -237,5 +280,6 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+showLineSelector();
 resetGame();
 gameLoop();
