@@ -9,7 +9,10 @@ window.TRACK_WIDTH = canvas.width / window.TRACKS;
 window.SIGNAL_HEIGHT = Math.max(50, Math.floor(canvas.height / 10));
 window.SIGNAL_WIDTH = window.TRACK_WIDTH - 20;
 window.SIGNAL_SPEED = 2;
-window.TRAIN_WIDTH = Math.max(40, Math.floor(window.TRACK_WIDTH * 0.7));
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  window.SIGNAL_SPEED /= 2;
+}
+window.TRAIN_WIDTH = Math.max(12, Math.floor(window.TRACK_WIDTH * 0.09));
 window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
 window.TRAIN_Y = canvas.height - window.TRAIN_HEIGHT - 30;
 
@@ -139,14 +142,23 @@ function drawScore() {
 }
 
 function drawGameOver() {
+  ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#fff';
-  ctx.font = '36px sans-serif';
+  // Responsive font size for 'Game Over!': 7% of canvas height, min 28px, max 56px
+  const gameOverFont = Math.max(28, Math.min(56, Math.floor(canvas.height * 0.07)));
+  ctx.font = gameOverFont + 'px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
-  ctx.font = '24px sans-serif';
-  ctx.fillText('Tap to Restart', canvas.width / 2, canvas.height / 2 + 10);
+  ctx.textBaseline = 'middle';
+  const centerX = canvas.width / (window.devicePixelRatio || 1) / 2;
+  const centerY = canvas.height / (window.devicePixelRatio || 1) / 2;
+  ctx.fillText('Game Over!', centerX, centerY - gameOverFont);
+  // Responsive font size for 'Tap to Restart': 4% of canvas height, min 18px, max 36px
+  const restartFont = Math.max(18, Math.min(36, Math.floor(canvas.height * 0.04)));
+  ctx.font = restartFont + 'px sans-serif';
+  ctx.fillText('Tap to Restart', centerX, centerY + restartFont);
+  ctx.restore();
 }
 
 function update() {
@@ -196,10 +208,19 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawTracks();
   if (!selectedLine) {
+    ctx.save();
     ctx.fillStyle = '#222';
-    ctx.font = '32px sans-serif';
+    // Responsive font size: 6% of canvas height, min 24px, max 48px
+    const fontSize = Math.max(24, Math.min(48, Math.floor(canvas.height * 0.06)));
+    ctx.font = fontSize + 'px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Select a Rail Line to Start', canvas.width / 2, canvas.height / 2);
+    ctx.textBaseline = 'middle';
+    // Use the visible (CSS) canvas size for centering
+    const rect = canvas.getBoundingClientRect();
+    const centerX = canvas.width / (window.devicePixelRatio || 1) / 2;
+    const centerY = canvas.height / (window.devicePixelRatio || 1) / 2;
+    ctx.fillText('Select a Rail Line to Start', centerX, centerY);
+    ctx.restore();
     return;
   }
   signalRows.forEach(drawSignalRow);
@@ -350,7 +371,7 @@ function resizeCanvas() {
   window.TRACK_WIDTH = canvas.width / window.TRACKS / dpr;
   window.SIGNAL_HEIGHT = Math.max(50, Math.floor(canvas.height / 10 / dpr));
   window.SIGNAL_WIDTH = window.TRACK_WIDTH - 20;
-  window.TRAIN_WIDTH = Math.max(40, Math.floor(window.TRACK_WIDTH * 0.7));
+  window.TRAIN_WIDTH = Math.max(12, Math.floor(window.TRACK_WIDTH * 0.09));
   window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
   window.TRAIN_Y = canvas.height / dpr - window.TRAIN_HEIGHT - 30;
 }
