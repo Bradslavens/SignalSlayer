@@ -30,33 +30,36 @@ let signalRows = [];
 let playerTrack = 1; // 0=left, 1=center, 2=right
 let gameOver = false;
 let score = 0;
+let currentCorrectIndex = 0;
 
 function randomSignalRow() {
-  // Pick 1 correct and 2 incorrect signals, shuffle, and assign to tracks
-  const correct = correctSignals[Math.floor(Math.random() * correctSignals.length)];
+  // The correct signal is always the current one in order
+  const correct = correctSignals[currentCorrectIndex];
+  // Pick 2 random incorrect signals (not the correct one)
   let incorrects = [];
   while (incorrects.length < 2) {
     let s = incorrectSignals[Math.floor(Math.random() * incorrectSignals.length)];
     if (s !== correct && !incorrects.includes(s)) incorrects.push(s);
   }
-  let signals = [correct, ...incorrects];
-  // Shuffle
-  for (let i = signals.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [signals[i], signals[j]] = [signals[j], signals[i]];
+  // Shuffle tracks and place correct signal in a random track
+  let tracks = [0, 1, 2];
+  const correctTrack = tracks.splice(Math.floor(Math.random() * tracks.length), 1)[0];
+  let signals = [];
+  for (let i = 0, incIdx = 0; i < 3; i++) {
+    if (i === correctTrack) {
+      signals.push({ name: correct, correct: true, track: i });
+    } else {
+      signals.push({ name: incorrects[incIdx++], correct: false, track: i });
+    }
   }
-  // Mark which is correct
   return {
-    signals: signals.map((name, idx) => ({
-      name,
-      correct: name === correct,
-      track: idx
-    })),
+    signals,
     y: -SIGNAL_HEIGHT
   };
 }
 
 function resetGame() {
+  currentCorrectIndex = 0;
   signalRows = [randomSignalRow()];
   playerTrack = 1;
   gameOver = false;
@@ -126,7 +129,7 @@ function update() {
     signalRows.shift();
   }
   // Add new row if needed
-  if (signalRows.length === 0 || signalRows[signalRows.length - 1].y > SIGNAL_HEIGHT * 2) {
+  if (signalRows.length === 0) {
     signalRows.push(randomSignalRow());
   }
   // Collision detection
@@ -138,11 +141,15 @@ function update() {
       const signal = row.signals[playerTrack];
       if (signal) {
         if (signal.correct) {
-          // Clear this row
+          // Clear this row and advance to next correct signal
           row.y = canvas.height + 1; // Mark for removal
           score++;
+          currentCorrectIndex = (currentCorrectIndex + 1) % correctSignals.length;
+          // Immediately push the next row for the next correct signal
+          signalRows.push(randomSignalRow());
         } else {
           gameOver = true;
+          currentCorrectIndex = 0; // Reset to first correct signal
         }
       }
     }
