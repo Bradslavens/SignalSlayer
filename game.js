@@ -4,14 +4,14 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Game constants
-const TRACKS = 3;
-const TRACK_WIDTH = canvas.width / TRACKS;
-const SIGNAL_HEIGHT = 60;
-const SIGNAL_WIDTH = TRACK_WIDTH - 20;
-const SIGNAL_SPEED = 2;
-const TRAIN_WIDTH = 50;
-const TRAIN_HEIGHT = 50;
-const TRAIN_Y = canvas.height - 100;
+window.TRACKS = 3;
+window.TRACK_WIDTH = canvas.width / window.TRACKS;
+window.SIGNAL_HEIGHT = Math.max(50, Math.floor(canvas.height / 10));
+window.SIGNAL_WIDTH = window.TRACK_WIDTH - 20;
+window.SIGNAL_SPEED = 2;
+window.TRAIN_WIDTH = Math.max(40, Math.floor(window.TRACK_WIDTH * 0.7));
+window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
+window.TRAIN_Y = canvas.height - window.TRAIN_HEIGHT - 30;
 
 // Import signal arrays from separate files
 import { correctSignals } from './correctSignals.js';
@@ -58,7 +58,7 @@ function showLineSelector() {
 }
 
 function randomSignalRow() {
-  if (!selectedLine) return { signals: [], y: -SIGNAL_HEIGHT };
+  if (!selectedLine) return { signals: [], y: -window.SIGNAL_HEIGHT };
   // The correct signal is always the current one in order for the selected line
   const correct = currentLineSignals[currentCorrectIndex];
   // Use only incorrect signals for the selected line
@@ -82,7 +82,7 @@ function randomSignalRow() {
   }
   return {
     signals,
-    y: -SIGNAL_HEIGHT
+    y: -window.SIGNAL_HEIGHT
   };
 }
 
@@ -98,37 +98,37 @@ function resetGame() {
 function drawTracks() {
   ctx.strokeStyle = '#888';
   ctx.lineWidth = 4;
-  for (let i = 1; i < TRACKS; i++) {
+  for (let i = 1; i < window.TRACKS; i++) {
     ctx.beginPath();
-    ctx.moveTo(i * TRACK_WIDTH, 0);
-    ctx.lineTo(i * TRACK_WIDTH, canvas.height);
+    ctx.moveTo(i * window.TRACK_WIDTH, 0);
+    ctx.lineTo(i * window.TRACK_WIDTH, canvas.height);
     ctx.stroke();
   }
 }
 
 function drawSignalRow(row) {
   row.signals.forEach((signal, i) => {
-    const x = signal.track * TRACK_WIDTH + 10;
+    const x = signal.track * window.TRACK_WIDTH + 10;
     ctx.fillStyle = '#fff';
-    ctx.fillRect(x, row.y, SIGNAL_WIDTH, SIGNAL_HEIGHT);
+    ctx.fillRect(x, row.y, window.SIGNAL_WIDTH, window.SIGNAL_HEIGHT);
     ctx.strokeStyle = '#333';
-    ctx.strokeRect(x, row.y, SIGNAL_WIDTH, SIGNAL_HEIGHT);
+    ctx.strokeRect(x, row.y, window.SIGNAL_WIDTH, window.SIGNAL_HEIGHT);
     ctx.fillStyle = '#222';
-    ctx.font = '18px sans-serif';
+    ctx.font = Math.max(16, Math.floor(window.SIGNAL_HEIGHT * 0.35)) + 'px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(signal.name, x + SIGNAL_WIDTH / 2, row.y + SIGNAL_HEIGHT / 2 + 6);
+    ctx.fillText(signal.name, x + window.SIGNAL_WIDTH / 2, row.y + window.SIGNAL_HEIGHT / 2 + 6);
   });
 }
 
 function drawTrain() {
-  const x = playerTrack * TRACK_WIDTH + (TRACK_WIDTH - TRAIN_WIDTH) / 2;
+  const x = playerTrack * window.TRACK_WIDTH + (window.TRACK_WIDTH - window.TRAIN_WIDTH) / 2;
   ctx.fillStyle = 'red';
-  ctx.fillRect(x, TRAIN_Y, TRAIN_WIDTH, TRAIN_HEIGHT);
+  ctx.fillRect(x, window.TRAIN_Y, window.TRAIN_WIDTH, window.TRAIN_HEIGHT);
   ctx.strokeStyle = '#000';
-  ctx.strokeRect(x, TRAIN_Y, TRAIN_WIDTH, TRAIN_HEIGHT);
+  ctx.strokeRect(x, window.TRAIN_Y, window.TRAIN_WIDTH, window.TRAIN_HEIGHT);
   // Simple train face
   ctx.fillStyle = '#fff';
-  ctx.fillRect(x + 10, TRAIN_Y + 10, 30, 20);
+  ctx.fillRect(x + window.TRAIN_WIDTH * 0.2, window.TRAIN_Y + window.TRAIN_HEIGHT * 0.2, window.TRAIN_WIDTH * 0.6, window.TRAIN_HEIGHT * 0.4);
 }
 
 function drawScore() {
@@ -153,7 +153,7 @@ function update() {
   if (!selectedLine) return;
   if (gameOver) return;
   // Move signal rows down
-  signalRows.forEach(row => row.y += SIGNAL_SPEED);
+  signalRows.forEach(row => row.y += window.SIGNAL_SPEED);
   // Remove rows that are off screen
   if (signalRows.length && signalRows[0].y > canvas.height) {
     signalRows.shift();
@@ -165,8 +165,8 @@ function update() {
   // Collision detection
   signalRows.forEach(row => {
     if (
-      row.y + SIGNAL_HEIGHT >= TRAIN_Y &&
-      row.y < TRAIN_Y + TRAIN_HEIGHT
+      row.y + window.SIGNAL_HEIGHT >= window.TRAIN_Y &&
+      row.y < window.TRAIN_Y + window.TRAIN_HEIGHT
     ) {
       const signal = row.signals[playerTrack];
       if (signal) {
@@ -222,7 +222,7 @@ window.addEventListener('keydown', e => {
   }
   if (e.code === 'ArrowLeft' && playerTrack > 0) {
     playerTrack--;
-  } else if (e.code === 'ArrowRight' && playerTrack < TRACKS - 1) {
+  } else if (e.code === 'ArrowRight' && playerTrack < window.TRACKS - 1) {
     playerTrack++;
   }
 });
@@ -250,7 +250,7 @@ function handleTouchEnd(e) {
   if (Math.abs(dx) > 30) {
     if (dx < 0 && playerTrack > 0) {
       playerTrack--;
-    } else if (dx > 0 && playerTrack < TRACKS - 1) {
+    } else if (dx > 0 && playerTrack < window.TRACKS - 1) {
       playerTrack++;
     }
   }
@@ -305,11 +305,11 @@ function createMobileControls() {
   rightBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
   rightBtn.addEventListener('touchstart', e => {
     e.preventDefault();
-    if (playerTrack < TRACKS - 1 && !gameOver) playerTrack++;
+    if (playerTrack < window.TRACKS - 1 && !gameOver) playerTrack++;
   });
   rightBtn.addEventListener('mousedown', e => {
     e.preventDefault();
-    if (playerTrack < TRACKS - 1 && !gameOver) playerTrack++;
+    if (playerTrack < window.TRACKS - 1 && !gameOver) playerTrack++;
   });
 
   controls.appendChild(leftBtn);
@@ -344,6 +344,15 @@ function resizeCanvas() {
   canvas.style.height = height + 'px';
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
+
+  // Update game constants for new canvas size
+  window.TRACKS = 3;
+  window.TRACK_WIDTH = canvas.width / window.TRACKS / dpr;
+  window.SIGNAL_HEIGHT = Math.max(50, Math.floor(canvas.height / 10 / dpr));
+  window.SIGNAL_WIDTH = window.TRACK_WIDTH - 20;
+  window.TRAIN_WIDTH = Math.max(40, Math.floor(window.TRACK_WIDTH * 0.7));
+  window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
+  window.TRAIN_Y = canvas.height / dpr - window.TRAIN_HEIGHT - 30;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
