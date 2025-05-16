@@ -61,10 +61,12 @@ function randomSignalRow() {
   if (!selectedLine) return { signals: [], y: -SIGNAL_HEIGHT };
   // The correct signal is always the current one in order for the selected line
   const correct = currentLineSignals[currentCorrectIndex];
+  // Use only incorrect signals for the selected line
+  const lineIncorrects = incorrectSignals[selectedLine] || [];
   // Pick 2 random incorrect signals (not the correct one)
   let incorrects = [];
-  while (incorrects.length < 2) {
-    let s = incorrectSignals[Math.floor(Math.random() * incorrectSignals.length)];
+  while (incorrects.length < 2 && lineIncorrects.length > 0) {
+    let s = lineIncorrects[Math.floor(Math.random() * lineIncorrects.length)];
     if (s !== correct && !incorrects.includes(s)) incorrects.push(s);
   }
   // Shuffle tracks and place correct signal in a random track
@@ -157,7 +159,7 @@ function update() {
     signalRows.shift();
   }
   // Add new row if needed
-  if (signalRows.length === 0) {
+  if (signalRows.length === 0 && currentCorrectIndex < currentLineSignals.length) {
     signalRows.push(randomSignalRow());
   }
   // Collision detection
@@ -172,9 +174,12 @@ function update() {
           // Clear this row and advance to next correct signal
           row.y = canvas.height + 1; // Mark for removal
           score++;
-          currentCorrectIndex = (currentCorrectIndex + 1) % correctSignals.length;
-          // Immediately push the next row for the next correct signal
-          signalRows.push(randomSignalRow());
+          currentCorrectIndex++;
+          if (currentCorrectIndex < currentLineSignals.length) {
+            signalRows.push(randomSignalRow());
+          } else {
+            gameOver = true; // End game when all signals are used
+          }
         } else {
           gameOver = true;
           currentCorrectIndex = 0; // Reset to first correct signal
