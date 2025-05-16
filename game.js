@@ -290,11 +290,12 @@ function createMobileControls() {
   const controls = document.createElement('div');
   controls.id = 'mobile-controls';
   controls.style.position = 'absolute';
-  controls.style.bottom = '40px';
-  controls.style.left = '50%';
-  controls.style.transform = 'translateX(-50%)';
+  controls.style.bottom = '32px';
+  controls.style.left = '0';
+  controls.style.width = '100%';
   controls.style.display = 'flex';
-  controls.style.gap = '40px';
+  controls.style.justifyContent = 'space-between';
+  controls.style.pointerEvents = 'none'; // allow touches to pass through except buttons
   controls.style.zIndex = 20;
 
   const leftBtn = document.createElement('button');
@@ -306,6 +307,9 @@ function createMobileControls() {
   leftBtn.style.border = '2px solid #888';
   leftBtn.style.background = '#fff';
   leftBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+  leftBtn.style.marginLeft = '12px';
+  leftBtn.style.marginBottom = '0';
+  leftBtn.style.pointerEvents = 'auto';
   leftBtn.addEventListener('touchstart', e => {
     e.preventDefault();
     if (playerTrack > 0 && !gameOver) playerTrack--;
@@ -324,6 +328,9 @@ function createMobileControls() {
   rightBtn.style.border = '2px solid #888';
   rightBtn.style.background = '#fff';
   rightBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+  rightBtn.style.marginRight = '12px';
+  rightBtn.style.marginBottom = '0';
+  rightBtn.style.pointerEvents = 'auto';
   rightBtn.addEventListener('touchstart', e => {
     e.preventDefault();
     if (playerTrack < window.TRACKS - 1 && !gameOver) playerTrack++;
@@ -353,23 +360,28 @@ function resizeCanvas() {
   if (height > width) {
     [width, height] = [height, width];
   }
-  // Maintain 16:9 aspect ratio
+  // On small screens, use as much of the screen as possible, but keep 16:9 aspect ratio
+  let targetWidth = width;
+  let targetHeight = height;
   if (width / height > 16 / 9) {
-    width = height * 16 / 9;
+    targetWidth = height * 16 / 9;
   } else {
-    height = width * 9 / 16;
+    targetHeight = width * 9 / 16;
   }
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  canvas.style.width = width + 'px';
-  canvas.style.height = height + 'px';
+  // Ensure minimum size for small devices
+  targetWidth = Math.max(targetWidth, 320);
+  targetHeight = Math.max(targetHeight, 180);
+  canvas.width = targetWidth * dpr;
+  canvas.height = targetHeight * dpr;
+  canvas.style.width = targetWidth + 'px';
+  canvas.style.height = targetHeight + 'px';
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
 
   // Update game constants for new canvas size
   window.TRACKS = 3;
   window.TRACK_WIDTH = canvas.width / window.TRACKS / dpr;
-  window.SIGNAL_HEIGHT = Math.max(50, Math.floor(canvas.height / 10 / dpr));
+  window.SIGNAL_HEIGHT = Math.max(40, Math.floor(canvas.height / 10 / dpr));
   window.SIGNAL_WIDTH = window.TRACK_WIDTH - 20;
   window.TRAIN_WIDTH = Math.max(12, Math.floor(window.TRACK_WIDTH * 0.09));
   window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
