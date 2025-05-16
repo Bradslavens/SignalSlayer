@@ -324,14 +324,19 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
 
 // Responsive canvas for mobile
 function resizeCanvas() {
+  // Landscape: 16:9 aspect ratio, fill screen
   const dpr = window.devicePixelRatio || 1;
   let width = window.innerWidth;
   let height = window.innerHeight;
-  // Maintain aspect ratio (3:4)
-  if (width / height > 0.75) {
-    width = height * 0.75;
+  // Always use landscape
+  if (height > width) {
+    [width, height] = [height, width];
+  }
+  // Maintain 16:9 aspect ratio
+  if (width / height > 16 / 9) {
+    width = height * 16 / 9;
   } else {
-    height = width / 0.75;
+    height = width * 9 / 16;
   }
   canvas.width = width * dpr;
   canvas.height = height * dpr;
