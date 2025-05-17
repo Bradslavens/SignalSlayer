@@ -367,12 +367,12 @@ function resizeCanvas() {
   if (isMobile) {
     // Portrait: 9:16 aspect ratio, fill screen from top, leave space at bottom for controls
     if (width > height) [width, height] = [height, width];
-    let targetHeight = height;
+    let targetHeight = Math.floor(height * 0.9); // 90% of screen height
     let targetWidth = width;
-    if (height / width > 16 / 9) {
+    if (targetHeight / width > 16 / 9) {
       targetHeight = width * 16 / 9;
     } else {
-      targetWidth = height * 9 / 16;
+      targetWidth = targetHeight * 9 / 16;
     }
     const controlsHeight = 90;
     targetHeight = Math.max(targetHeight - controlsHeight, 320);
