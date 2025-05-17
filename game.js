@@ -238,10 +238,11 @@ function update() {
     signalRows.push(randomSignalRow());
   }
   // Collision detection
+  const trainTopY = window.TRAIN_Y - (window.TRAIN_HEIGHT * 9);
   signalRows.forEach(row => {
     if (
-      row.y + window.SIGNAL_HEIGHT >= window.TRAIN_Y &&
-      row.y < window.TRAIN_Y + window.TRAIN_HEIGHT
+      row.y + window.SIGNAL_HEIGHT >= trainTopY &&
+      row.y <= trainTopY
     ) {
       const signal = row.signals[playerTrack];
       if (signal) {
