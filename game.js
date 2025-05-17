@@ -10,7 +10,7 @@ window.SIGNAL_HEIGHT = Math.max(50, Math.floor(canvas.height / 10));
 window.SIGNAL_WIDTH = window.TRACK_WIDTH - 20;
 window.SIGNAL_SPEED = 2;
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-  window.SIGNAL_SPEED /= 2;
+  window.SIGNAL_SPEED *= 2; // Double the speed for mobile
 }
 window.TRAIN_WIDTH = Math.max(12, Math.floor(window.TRACK_WIDTH * 0.09));
 window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
