@@ -315,58 +315,6 @@ function handleMouseDown(e) {
 }
 
 // --- Responsive Layout Logic ---
-function createMobileControls() {
-  const controls = document.createElement('div');
-  controls.id = 'mobile-controls';
-  controls.style.position = 'absolute';
-  controls.style.left = '0';
-  controls.style.bottom = '0';
-  controls.style.width = '100%';
-  controls.style.display = 'flex';
-  controls.style.justifyContent = 'space-between';
-  controls.style.alignItems = 'flex-end';
-  controls.style.pointerEvents = 'none';
-  controls.style.zIndex = 20;
-  controls.style.height = '90px';
-  controls.style.background = 'transparent';
-
-  const leftBtn = document.createElement('button');
-  leftBtn.innerHTML = '◀️';
-  leftBtn.style.fontSize = '40px';
-  leftBtn.style.width = '70px';
-  leftBtn.style.height = '70px';
-  leftBtn.style.borderRadius = '50%';
-  leftBtn.style.border = '2px solid #888';
-  leftBtn.style.background = '#fff';
-  leftBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-  leftBtn.style.marginLeft = '0';
-  leftBtn.style.marginBottom = '10px';
-  leftBtn.style.pointerEvents = 'auto';
-  leftBtn.style.position = 'relative';
-  leftBtn.style.left = '0';
-  leftBtn.style.alignSelf = 'flex-start';
-
-  const rightBtn = document.createElement('button');
-  rightBtn.innerHTML = '▶️';
-  rightBtn.style.fontSize = '40px';
-  rightBtn.style.width = '70px';
-  rightBtn.style.height = '70px';
-  rightBtn.style.borderRadius = '50%';
-  rightBtn.style.border = '2px solid #888';
-  rightBtn.style.background = '#fff';
-  rightBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-  rightBtn.style.marginRight = '0';
-  rightBtn.style.marginBottom = '10px';
-  rightBtn.style.pointerEvents = 'auto';
-  rightBtn.style.position = 'relative';
-  rightBtn.style.right = '0';
-  rightBtn.style.alignSelf = 'flex-end';
-
-  controls.appendChild(leftBtn);
-  controls.appendChild(rightBtn);
-  document.body.appendChild(controls);
-}
-
 function createDesktopControls() {
   // For desktop, no on-screen controls needed, but you could add WASD or other UI if desired
 }
@@ -376,9 +324,7 @@ function setupControls() {
   const oldMobile = document.getElementById('mobile-controls');
   if (oldMobile) oldMobile.remove();
   // ...add more cleanup if you add desktop controls...
-  if (isMobile) {
-    createMobileControls();
-  } else {
+  if (!isMobile) {
     createDesktopControls();
   }
 }
@@ -406,7 +352,8 @@ function resizeCanvas() {
     canvas.style.height = targetHeight + 'px';
     canvas.style.position = 'absolute';
     canvas.style.top = '0';
-    canvas.style.left = '0';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translateX(-50%)';
   } else {
     // Desktop: Landscape 16:9, fill as much as possible
     if (height > width) [width, height] = [height, width];
