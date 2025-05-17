@@ -167,24 +167,26 @@ function drawSignalRow(row) {
 
 // Draw the train
 function drawTrain() {
-  const x = playerTrack * window.TRACK_WIDTH + (window.TRACK_WIDTH - window.TRAIN_WIDTH * 10) / 2;
-  // Draw trolley image 10x larger if loaded, else fallback to large red rectangle
+  // Set train length scaling: 10x on mobile, 5x (half-length) on desktop
+  const trainLengthScale = isMobile ? 10 : 5;
+  const x = playerTrack * window.TRACK_WIDTH + (window.TRACK_WIDTH - window.TRAIN_WIDTH * trainLengthScale) / 2;
+  // Draw trolley image larger if loaded, else fallback to large red rectangle
   if (trolleyImage.complete && trolleyImage.naturalWidth > 0) {
     ctx.drawImage(
       trolleyImage,
       x,
-      window.TRAIN_Y - (window.TRAIN_HEIGHT * 9), // move up so it sits on the track
-      window.TRAIN_WIDTH * 10,
-      window.TRAIN_HEIGHT * 10
+      window.TRAIN_Y - (window.TRAIN_HEIGHT * (trainLengthScale - 1)), // move up so it sits on the track
+      window.TRAIN_WIDTH * trainLengthScale,
+      window.TRAIN_HEIGHT * trainLengthScale
     );
   } else {
     ctx.fillStyle = 'red';
-    ctx.fillRect(x, window.TRAIN_Y - (window.TRAIN_HEIGHT * 9), window.TRAIN_WIDTH * 10, window.TRAIN_HEIGHT * 10);
+    ctx.fillRect(x, window.TRAIN_Y - (window.TRAIN_HEIGHT * (trainLengthScale - 1)), window.TRAIN_WIDTH * trainLengthScale, window.TRAIN_HEIGHT * trainLengthScale);
     ctx.strokeStyle = '#000';
-    ctx.strokeRect(x, window.TRAIN_Y - (window.TRAIN_HEIGHT * 9), window.TRAIN_WIDTH * 10, window.TRAIN_HEIGHT * 10);
+    ctx.strokeRect(x, window.TRAIN_Y - (window.TRAIN_HEIGHT * (trainLengthScale - 1)), window.TRAIN_WIDTH * trainLengthScale, window.TRAIN_HEIGHT * trainLengthScale);
     // Simple train face
     ctx.fillStyle = '#fff';
-    ctx.fillRect(x + window.TRAIN_WIDTH * 2, window.TRAIN_Y - (window.TRAIN_HEIGHT * 9) + window.TRAIN_HEIGHT * 2, window.TRAIN_WIDTH * 6, window.TRAIN_HEIGHT * 4);
+    ctx.fillRect(x + window.TRAIN_WIDTH * (trainLengthScale * 0.2), window.TRAIN_Y - (window.TRAIN_HEIGHT * (trainLengthScale - 1)) + window.TRAIN_HEIGHT * (trainLengthScale * 0.2), window.TRAIN_WIDTH * (trainLengthScale * 0.6), window.TRAIN_HEIGHT * (trainLengthScale * 0.4));
   }
 }
 
@@ -238,11 +240,14 @@ function update() {
     signalRows.push(randomSignalRow());
   }
   // Collision detection
-  const trainTopY = window.TRAIN_Y - (window.TRAIN_HEIGHT * 9);
+  const trainLengthScale = isMobile ? 10 : 5;
+  const trainTopY = window.TRAIN_Y - (window.TRAIN_HEIGHT * (trainLengthScale - 1));
+  const trainBottomY = window.TRAIN_Y + window.TRAIN_HEIGHT * trainLengthScale;
   signalRows.forEach(row => {
+    // Check if the bottom of the signal box touches or passes the top of the train
     if (
       row.y + window.SIGNAL_HEIGHT >= trainTopY &&
-      row.y <= trainTopY
+      row.y <= trainBottomY
     ) {
       const signal = row.signals[playerTrack];
       if (signal) {
