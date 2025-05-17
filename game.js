@@ -334,9 +334,8 @@ function resizeCanvas() {
   let height = window.innerHeight;
   if (isMobile) {
     if (width > height) [width, height] = [height, width];
-    // Subtract controls height from available height
-    const controlsHeight = 90;
-    let targetHeight = Math.floor(height * 0.9) - controlsHeight;
+    // Use full available height for canvas on mobile
+    let targetHeight = height;
     let targetWidth = width;
     if (targetHeight / width > 16 / 9) {
       targetHeight = width * 16 / 9;
