@@ -41,6 +41,10 @@ let bgY = 0;
 const trackImage = new Image();
 trackImage.src = 'railBGT.PNG';
 
+// --- Player Trolley Image Setup ---
+const trolleyImage = new Image();
+trolleyImage.src = 'redTrolley.png';
+
 // Show line selector dropdown
 function showLineSelector() {
   let selector = document.createElement('select');
@@ -163,14 +167,25 @@ function drawSignalRow(row) {
 
 // Draw the train
 function drawTrain() {
-  const x = playerTrack * window.TRACK_WIDTH + (window.TRACK_WIDTH - window.TRAIN_WIDTH) / 2;
-  ctx.fillStyle = 'red';
-  ctx.fillRect(x, window.TRAIN_Y, window.TRAIN_WIDTH, window.TRAIN_HEIGHT);
-  ctx.strokeStyle = '#000';
-  ctx.strokeRect(x, window.TRAIN_Y, window.TRAIN_WIDTH, window.TRAIN_HEIGHT);
-  // Simple train face
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(x + window.TRAIN_WIDTH * 0.2, window.TRAIN_Y + window.TRAIN_HEIGHT * 0.2, window.TRAIN_WIDTH * 0.6, window.TRAIN_HEIGHT * 0.4);
+  const x = playerTrack * window.TRACK_WIDTH + (window.TRACK_WIDTH - window.TRAIN_WIDTH * 10) / 2;
+  // Draw trolley image 10x larger if loaded, else fallback to large red rectangle
+  if (trolleyImage.complete && trolleyImage.naturalWidth > 0) {
+    ctx.drawImage(
+      trolleyImage,
+      x,
+      window.TRAIN_Y - (window.TRAIN_HEIGHT * 9), // move up so it sits on the track
+      window.TRAIN_WIDTH * 10,
+      window.TRAIN_HEIGHT * 10
+    );
+  } else {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(x, window.TRAIN_Y - (window.TRAIN_HEIGHT * 9), window.TRAIN_WIDTH * 10, window.TRAIN_HEIGHT * 10);
+    ctx.strokeStyle = '#000';
+    ctx.strokeRect(x, window.TRAIN_Y - (window.TRAIN_HEIGHT * 9), window.TRAIN_WIDTH * 10, window.TRAIN_HEIGHT * 10);
+    // Simple train face
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x + window.TRAIN_WIDTH * 2, window.TRAIN_Y - (window.TRAIN_HEIGHT * 9) + window.TRAIN_HEIGHT * 2, window.TRAIN_WIDTH * 6, window.TRAIN_HEIGHT * 4);
+  }
 }
 
 // Draw the score
