@@ -319,63 +319,12 @@ function createDesktopControls() {
   // For desktop, no on-screen controls needed, but you could add WASD or other UI if desired
 }
 
-function createMobileControls() {
-  let controls = document.createElement('div');
-  controls.id = 'mobile-controls';
-  controls.style.position = 'fixed';
-  controls.style.left = 0;
-  controls.style.right = 0;
-  controls.style.bottom = '0';
-  controls.style.width = '100vw';
-  controls.style.display = 'flex';
-  controls.style.justifyContent = 'space-between'; // Buttons at edges
-  controls.style.alignItems = 'flex-end';
-  controls.style.pointerEvents = 'none';
-  controls.style.zIndex = 20;
-  controls.style.background = 'transparent';
-  controls.style.height = '90px';
-  controls.style.paddingLeft = '24px'; // Padding from left edge
-  controls.style.paddingRight = '24px'; // Padding from right edge
-
-  let leftBtn = document.createElement('button');
-  leftBtn.innerText = '◀️';
-  leftBtn.style.fontSize = '40px';
-  leftBtn.style.width = '70px';
-  leftBtn.style.height = '70px';
-  leftBtn.style.borderRadius = '50%';
-  leftBtn.style.margin = '0 0 10px 0'; // Only bottom margin
-  leftBtn.style.pointerEvents = 'auto';
-  leftBtn.onclick = () => {
-    if (playerTrack > 0) playerTrack--;
-  };
-
-  let rightBtn = document.createElement('button');
-  rightBtn.innerText = '▶️';
-  rightBtn.style.fontSize = '40px';
-  rightBtn.style.width = '70px';
-  rightBtn.style.height = '70px';
-  rightBtn.style.borderRadius = '50%';
-  rightBtn.style.margin = '0 0 10px 0'; // Only bottom margin
-  rightBtn.style.pointerEvents = 'auto';
-  rightBtn.onclick = () => {
-    if (playerTrack < window.TRACKS - 1) playerTrack++;
-  };
-
-  controls.appendChild(leftBtn);
-  controls.appendChild(rightBtn);
-  document.body.appendChild(controls);
-}
-
 function setupControls() {
   // Remove any existing controls
   const oldMobile = document.getElementById('mobile-controls');
   if (oldMobile) oldMobile.remove();
   // ...add more cleanup if you add desktop controls...
-  if (!isMobile) {
-    createDesktopControls();
-  } else {
-    createMobileControls();
-  }
+  // No on-screen controls for either mobile or desktop
 }
 
 // Responsive canvas for mobile
@@ -469,3 +418,21 @@ if (isMobile) {
 showLineSelector();
 resetGame();
 gameLoop();
+
+// --- Tap-to-move logic for mobile ---
+canvas.addEventListener('click', function(e) {
+  if (!isMobile) return;
+  if (gameOver) {
+    resetGame();
+    return;
+  }
+  // Get tap x relative to canvas
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+  // Find which track was tapped
+  const dpr = window.devicePixelRatio || 1;
+  const track = Math.floor(x / (canvas.width / window.TRACKS));
+  if (track >= 0 && track < window.TRACKS) {
+    playerTrack = track;
+  }
+});
