@@ -157,10 +157,14 @@ function drawGameOver() {
   const centerX = canvas.width / (window.devicePixelRatio || 1) / 2;
   const centerY = canvas.height / (window.devicePixelRatio || 1) / 2;
   ctx.fillText('Game Over!', centerX, centerY - gameOverFont);
-  // Responsive font size for 'Tap to Restart': 4% of canvas height, min 18px, max 36px
+  // Responsive font size for restart message
   const restartFont = Math.max(18, Math.min(36, Math.floor(canvas.height * 0.04)));
   ctx.font = restartFont + 'px sans-serif';
-  ctx.fillText('Tap to Restart', centerX, centerY + restartFont);
+  if (isMobile) {
+    ctx.fillText('Tap to Restart', centerX, centerY + restartFont);
+  } else {
+    ctx.fillText('Press Spacebar to Restart', centerX, centerY + restartFont);
+  }
   ctx.restore();
 }
 
@@ -240,7 +244,7 @@ function gameLoop() {
 
 // Controls
 window.addEventListener('keydown', e => {
-  if (gameOver && (e.code === 'Enter' || e.code === 'NumpadEnter')) {
+  if (gameOver && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space')) {
     resetGame();
     return;
   }
