@@ -339,11 +339,12 @@ function createMobileControls() {
   leftBtn.style.border = '2px solid #888';
   leftBtn.style.background = '#fff';
   leftBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-  leftBtn.style.marginLeft = '10px';
+  leftBtn.style.marginLeft = '0';
   leftBtn.style.marginBottom = '10px';
   leftBtn.style.pointerEvents = 'auto';
   leftBtn.style.position = 'relative';
   leftBtn.style.left = '0';
+  leftBtn.style.alignSelf = 'flex-start';
 
   const rightBtn = document.createElement('button');
   rightBtn.innerHTML = '▶️';
@@ -354,11 +355,12 @@ function createMobileControls() {
   rightBtn.style.border = '2px solid #888';
   rightBtn.style.background = '#fff';
   rightBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-  rightBtn.style.marginRight = '10px';
+  rightBtn.style.marginRight = '0';
   rightBtn.style.marginBottom = '10px';
   rightBtn.style.pointerEvents = 'auto';
   rightBtn.style.position = 'relative';
   rightBtn.style.right = '0';
+  rightBtn.style.alignSelf = 'flex-end';
 
   controls.appendChild(leftBtn);
   controls.appendChild(rightBtn);
