@@ -217,16 +217,38 @@ function draw() {
   if (!selectedLine) {
     ctx.save();
     ctx.fillStyle = '#222';
-    // Responsive font size: 6% of canvas height, min 24px, max 48px
-    const fontSize = Math.max(24, Math.min(48, Math.floor(canvas.height * 0.06)));
-    ctx.font = fontSize + 'px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    // Use the visible (CSS) canvas size for centering
-    const rect = canvas.getBoundingClientRect();
-    const centerX = canvas.width / (window.devicePixelRatio || 1) / 2;
-    const centerY = canvas.height / (window.devicePixelRatio || 1) / 2;
-    ctx.fillText('Select a Rail Line to Start', centerX, centerY);
+    // Responsive font size: 6% of canvas height, min 18px, max 48px
+    let fontSize = Math.max(18, Math.min(48, Math.floor(canvas.height * 0.06)));
+    if (isMobile) {
+      // Always wrap to two lines for mobile, and ensure font size fits both lines
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const centerX = canvas.width / (window.devicePixelRatio || 1) / 2;
+      const centerY = canvas.height / (window.devicePixelRatio || 1) / 2;
+      let fontSize = Math.max(14, Math.min(36, Math.floor(canvas.height * 0.05)));
+      ctx.font = fontSize + 'px sans-serif';
+      const line1 = 'Select a Rail Line';
+      const line2 = 'to Start';
+      // Reduce font size if either line is too wide
+      const maxWidth = canvas.width * 0.85;
+      let metrics1 = ctx.measureText(line1);
+      let metrics2 = ctx.measureText(line2);
+      while ((metrics1.width > maxWidth || metrics2.width > maxWidth) && fontSize > 10) {
+        fontSize -= 1;
+        ctx.font = fontSize + 'px sans-serif';
+        metrics1 = ctx.measureText(line1);
+        metrics2 = ctx.measureText(line2);
+      }
+      ctx.fillText(line1, centerX, centerY - fontSize/1.5);
+      ctx.fillText(line2, centerX, centerY + fontSize/1.5);
+    } else {
+      ctx.font = fontSize + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const centerX = canvas.width / (window.devicePixelRatio || 1) / 2;
+      const centerY = canvas.height / (window.devicePixelRatio || 1) / 2;
+      ctx.fillText('Select a Rail Line to Start', centerX, centerY);
+    }
     ctx.restore();
     return;
   }
