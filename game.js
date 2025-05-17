@@ -290,13 +290,15 @@ function createMobileControls() {
   const controls = document.createElement('div');
   controls.id = 'mobile-controls';
   controls.style.position = 'absolute';
-  controls.style.bottom = '32px';
   controls.style.left = '0';
+  controls.style.bottom = '0';
   controls.style.width = '100%';
   controls.style.display = 'flex';
   controls.style.justifyContent = 'space-between';
-  controls.style.pointerEvents = 'none'; // allow touches to pass through except buttons
+  controls.style.pointerEvents = 'none';
   controls.style.zIndex = 20;
+  controls.style.height = '90px'; // Reserve space for buttons
+  controls.style.background = 'transparent';
 
   const leftBtn = document.createElement('button');
   leftBtn.innerHTML = '◀️';
@@ -308,7 +310,7 @@ function createMobileControls() {
   leftBtn.style.background = '#fff';
   leftBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
   leftBtn.style.marginLeft = '12px';
-  leftBtn.style.marginBottom = '0';
+  leftBtn.style.marginBottom = '10px';
   leftBtn.style.pointerEvents = 'auto';
   leftBtn.addEventListener('touchstart', e => {
     e.preventDefault();
@@ -329,7 +331,7 @@ function createMobileControls() {
   rightBtn.style.background = '#fff';
   rightBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
   rightBtn.style.marginRight = '12px';
-  rightBtn.style.marginBottom = '0';
+  rightBtn.style.marginBottom = '10px';
   rightBtn.style.pointerEvents = 'auto';
   rightBtn.addEventListener('touchstart', e => {
     e.preventDefault();
@@ -352,29 +354,33 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
 
 // Responsive canvas for mobile
 function resizeCanvas() {
-  // Landscape: 16:9 aspect ratio, fill screen
+  // Portrait: 9:16 aspect ratio, fill screen from top, leave space at bottom for controls
   const dpr = window.devicePixelRatio || 1;
   let width = window.innerWidth;
   let height = window.innerHeight;
-  // Always use landscape
-  if (height > width) {
+  // Always use portrait
+  if (width > height) {
     [width, height] = [height, width];
   }
-  // On small screens, use as much of the screen as possible, but keep 16:9 aspect ratio
-  let targetWidth = width;
+  // Maintain 9:16 aspect ratio
   let targetHeight = height;
-  if (width / height > 16 / 9) {
-    targetWidth = height * 16 / 9;
+  let targetWidth = width;
+  if (height / width > 16 / 9) {
+    targetHeight = width * 16 / 9;
   } else {
-    targetHeight = width * 9 / 16;
+    targetWidth = height * 9 / 16;
   }
-  // Ensure minimum size for small devices
-  targetWidth = Math.max(targetWidth, 320);
-  targetHeight = Math.max(targetHeight, 180);
+  // Reserve space for controls (90px)
+  const controlsHeight = 90;
+  targetHeight = Math.max(targetHeight - controlsHeight, 320);
+  // Set canvas size
   canvas.width = targetWidth * dpr;
   canvas.height = targetHeight * dpr;
   canvas.style.width = targetWidth + 'px';
   canvas.style.height = targetHeight + 'px';
+  canvas.style.position = 'absolute';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
 
@@ -389,6 +395,36 @@ function resizeCanvas() {
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
+// Enforce portrait mode on mobile devices only
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  const metaViewport = document.querySelector('meta[name="viewport"]');
+  if (metaViewport) {
+    metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+  }
+  // Add a CSS rule to lock orientation to portrait on mobile
+  const style = document.createElement('style');
+  style.innerHTML = `
+  @media screen and (orientation:landscape) {
+    body::before {
+      content: 'Please rotate your device to portrait mode.';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #222;
+      color: #fff;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      text-align: center;
+    }
+    #gameCanvas, #mobile-controls {
+      display: none !important;
+    }
+  }`;
+  document.head.appendChild(style);
+}
 
 showLineSelector();
 resetGame();
