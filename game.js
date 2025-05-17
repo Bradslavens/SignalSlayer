@@ -32,6 +32,11 @@ let score = 0;
 let currentCorrectIndex = 0;
 let currentLineSignals = [];
 
+// --- Scrolling Background Setup ---
+const bgImage = new Image();
+bgImage.src = 'cactusBG.PNG';
+let bgY = 0;
+
 function showLineSelector() {
   let selector = document.createElement('select');
   selector.id = 'lineSelector';
@@ -171,6 +176,8 @@ function drawGameOver() {
 function update() {
   if (!selectedLine) return;
   if (gameOver) return;
+  // Move background down
+  bgY += window.SIGNAL_SPEED;
   // Move signal rows down
   signalRows.forEach(row => row.y += window.SIGNAL_SPEED);
   // Remove rows that are off screen
@@ -210,9 +217,20 @@ function update() {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // Background
-  ctx.fillStyle = '#b3e0ff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // --- Draw Scrolling Background ---
+  if (bgImage.complete && bgImage.naturalWidth > 0) {
+    const dpr = window.devicePixelRatio || 1;
+    const bgHeight = bgImage.height * (canvas.width / bgImage.width);
+    let drawY = (bgY % bgHeight) - bgHeight;
+    while (drawY < canvas.height) {
+      ctx.drawImage(bgImage, 0, drawY, canvas.width, bgHeight);
+      drawY += bgHeight;
+    }
+  } else {
+    // fallback solid color if image not loaded
+    ctx.fillStyle = '#b3e0ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
   drawTracks();
   if (!selectedLine) {
     ctx.save();
@@ -381,6 +399,7 @@ function resizeCanvas() {
   window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
   window.TRAIN_Y = canvas.height / dpr - window.TRAIN_HEIGHT - 30;
   setupControls();
+  bgY = 0; // Reset background scroll on resize
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
