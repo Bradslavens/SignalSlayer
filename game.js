@@ -20,6 +20,9 @@ window.TRAIN_Y = canvas.height - window.TRAIN_HEIGHT - 30;
 import { correctSignals } from './correctSignals.js';
 import { incorrectSignals } from './incorrectSignals.js';
 
+// Device detection
+const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
 // Game state
 let selectedLine = null;
 let signalRows = [];
@@ -285,7 +288,7 @@ function handleMouseDown(e) {
   }
 }
 
-// Add on-screen arrow buttons for mobile controls
+// --- Responsive Layout Logic ---
 function createMobileControls() {
   const controls = document.createElement('div');
   controls.id = 'mobile-controls';
@@ -295,9 +298,10 @@ function createMobileControls() {
   controls.style.width = '100%';
   controls.style.display = 'flex';
   controls.style.justifyContent = 'space-between';
+  controls.style.alignItems = 'flex-end';
   controls.style.pointerEvents = 'none';
   controls.style.zIndex = 20;
-  controls.style.height = '90px'; // Reserve space for buttons
+  controls.style.height = '90px';
   controls.style.background = 'transparent';
 
   const leftBtn = document.createElement('button');
@@ -309,17 +313,11 @@ function createMobileControls() {
   leftBtn.style.border = '2px solid #888';
   leftBtn.style.background = '#fff';
   leftBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-  leftBtn.style.marginLeft = '12px';
+  leftBtn.style.marginLeft = '10px';
   leftBtn.style.marginBottom = '10px';
   leftBtn.style.pointerEvents = 'auto';
-  leftBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (playerTrack > 0 && !gameOver) playerTrack--;
-  });
-  leftBtn.addEventListener('mousedown', e => {
-    e.preventDefault();
-    if (playerTrack > 0 && !gameOver) playerTrack--;
-  });
+  leftBtn.style.position = 'relative';
+  leftBtn.style.left = '0';
 
   const rightBtn = document.createElement('button');
   rightBtn.innerHTML = '▶️';
@@ -330,60 +328,78 @@ function createMobileControls() {
   rightBtn.style.border = '2px solid #888';
   rightBtn.style.background = '#fff';
   rightBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-  rightBtn.style.marginRight = '12px';
+  rightBtn.style.marginRight = '10px';
   rightBtn.style.marginBottom = '10px';
   rightBtn.style.pointerEvents = 'auto';
-  rightBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (playerTrack < window.TRACKS - 1 && !gameOver) playerTrack++;
-  });
-  rightBtn.addEventListener('mousedown', e => {
-    e.preventDefault();
-    if (playerTrack < window.TRACKS - 1 && !gameOver) playerTrack++;
-  });
+  rightBtn.style.position = 'relative';
+  rightBtn.style.right = '0';
 
   controls.appendChild(leftBtn);
   controls.appendChild(rightBtn);
   document.body.appendChild(controls);
 }
 
-// Only show mobile controls if on a touch device
-if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-  createMobileControls();
+function createDesktopControls() {
+  // For desktop, no on-screen controls needed, but you could add WASD or other UI if desired
+}
+
+function setupControls() {
+  // Remove any existing controls
+  const oldMobile = document.getElementById('mobile-controls');
+  if (oldMobile) oldMobile.remove();
+  // ...add more cleanup if you add desktop controls...
+  if (isMobile) {
+    createMobileControls();
+  } else {
+    createDesktopControls();
+  }
 }
 
 // Responsive canvas for mobile
 function resizeCanvas() {
-  // Portrait: 9:16 aspect ratio, fill screen from top, leave space at bottom for controls
   const dpr = window.devicePixelRatio || 1;
   let width = window.innerWidth;
   let height = window.innerHeight;
-  // Always use portrait
-  if (width > height) {
-    [width, height] = [height, width];
-  }
-  // Maintain 9:16 aspect ratio
-  let targetHeight = height;
-  let targetWidth = width;
-  if (height / width > 16 / 9) {
-    targetHeight = width * 16 / 9;
+  if (isMobile) {
+    // Portrait: 9:16 aspect ratio, fill screen from top, leave space at bottom for controls
+    if (width > height) [width, height] = [height, width];
+    let targetHeight = height;
+    let targetWidth = width;
+    if (height / width > 16 / 9) {
+      targetHeight = width * 16 / 9;
+    } else {
+      targetWidth = height * 9 / 16;
+    }
+    const controlsHeight = 90;
+    targetHeight = Math.max(targetHeight - controlsHeight, 320);
+    canvas.width = targetWidth * dpr;
+    canvas.height = targetHeight * dpr;
+    canvas.style.width = targetWidth + 'px';
+    canvas.style.height = targetHeight + 'px';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
   } else {
-    targetWidth = height * 9 / 16;
+    // Desktop: Landscape 16:9, fill as much as possible
+    if (height > width) [width, height] = [height, width];
+    let targetWidth = width;
+    let targetHeight = height;
+    if (width / height > 16 / 9) {
+      targetWidth = height * 16 / 9;
+    } else {
+      targetHeight = width * 9 / 16;
+    }
+    canvas.width = targetWidth * dpr;
+    canvas.height = targetHeight * dpr;
+    canvas.style.width = targetWidth + 'px';
+    canvas.style.height = targetHeight + 'px';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translateX(-50%)';
   }
-  // Reserve space for controls (90px)
-  const controlsHeight = 90;
-  targetHeight = Math.max(targetHeight - controlsHeight, 320);
-  // Set canvas size
-  canvas.width = targetWidth * dpr;
-  canvas.height = targetHeight * dpr;
-  canvas.style.width = targetWidth + 'px';
-  canvas.style.height = targetHeight + 'px';
-  canvas.style.position = 'absolute';
-  canvas.style.top = '0';
-  canvas.style.left = '0';
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
-
   // Update game constants for new canvas size
   window.TRACKS = 3;
   window.TRACK_WIDTH = canvas.width / window.TRACKS / dpr;
@@ -392,17 +408,17 @@ function resizeCanvas() {
   window.TRAIN_WIDTH = Math.max(12, Math.floor(window.TRACK_WIDTH * 0.09));
   window.TRAIN_HEIGHT = window.TRAIN_WIDTH;
   window.TRAIN_Y = canvas.height / dpr - window.TRAIN_HEIGHT - 30;
+  setupControls();
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 // Enforce portrait mode on mobile devices only
-if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+if (isMobile) {
   const metaViewport = document.querySelector('meta[name="viewport"]');
   if (metaViewport) {
     metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
   }
-  // Add a CSS rule to lock orientation to portrait on mobile
   const style = document.createElement('style');
   style.innerHTML = `
   @media screen and (orientation:landscape) {
