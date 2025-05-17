@@ -37,6 +37,11 @@ const bgImage = new Image();
 bgImage.src = 'cactusBG.PNG';
 let bgY = 0;
 
+// --- Track Image Setup ---
+const trackImage = new Image();
+trackImage.src = 'railBGT.PNG';
+
+// Show line selector dropdown
 function showLineSelector() {
   let selector = document.createElement('select');
   selector.id = 'lineSelector';
@@ -68,6 +73,7 @@ function showLineSelector() {
   });
 }
 
+// Generate a random signal row
 function randomSignalRow() {
   if (!selectedLine) return { signals: [], y: -window.SIGNAL_HEIGHT };
   // The correct signal is always the current one in order for the selected line
@@ -97,6 +103,7 @@ function randomSignalRow() {
   };
 }
 
+// Reset the game state
 function resetGame() {
   if (!selectedLine) return;
   currentCorrectIndex = 0;
@@ -106,17 +113,40 @@ function resetGame() {
   score = 0;
 }
 
+// Draw the tracks
 function drawTracks() {
-  ctx.strokeStyle = '#888';
-  ctx.lineWidth = 4;
-  for (let i = 1; i < window.TRACKS; i++) {
-    ctx.beginPath();
-    ctx.moveTo(i * window.TRACK_WIDTH, 0);
-    ctx.lineTo(i * window.TRACK_WIDTH, canvas.height);
-    ctx.stroke();
+  // Draw each track using the track image, scrolling with bgY
+  if (trackImage.complete && trackImage.naturalWidth > 0) {
+    const dpr = window.devicePixelRatio || 1;
+    const trackWidth = window.TRACK_WIDTH;
+    const trackHeight = trackImage.height * (trackWidth / trackImage.width);
+    for (let t = 0; t < window.TRACKS; t++) {
+      let drawY = (bgY % trackHeight) - trackHeight;
+      while (drawY < canvas.height) {
+        ctx.drawImage(
+          trackImage,
+          t * trackWidth,
+          drawY,
+          trackWidth,
+          trackHeight
+        );
+        drawY += trackHeight;
+      }
+    }
+  } else {
+    // fallback: draw lines if image not loaded
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 4;
+    for (let i = 1; i < window.TRACKS; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * window.TRACK_WIDTH, 0);
+      ctx.lineTo(i * window.TRACK_WIDTH, canvas.height);
+      ctx.stroke();
+    }
   }
 }
 
+// Draw a signal row
 function drawSignalRow(row) {
   row.signals.forEach((signal, i) => {
     const x = signal.track * window.TRACK_WIDTH + 10;
@@ -131,6 +161,7 @@ function drawSignalRow(row) {
   });
 }
 
+// Draw the train
 function drawTrain() {
   const x = playerTrack * window.TRACK_WIDTH + (window.TRACK_WIDTH - window.TRAIN_WIDTH) / 2;
   ctx.fillStyle = 'red';
@@ -142,6 +173,7 @@ function drawTrain() {
   ctx.fillRect(x + window.TRAIN_WIDTH * 0.2, window.TRAIN_Y + window.TRAIN_HEIGHT * 0.2, window.TRAIN_WIDTH * 0.6, window.TRAIN_HEIGHT * 0.4);
 }
 
+// Draw the score
 function drawScore() {
   ctx.fillStyle = '#222';
   ctx.font = '20px sans-serif';
@@ -149,6 +181,7 @@ function drawScore() {
   ctx.fillText('Score: ' + score, 10, 30);
 }
 
+// Draw the game over screen
 function drawGameOver() {
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
@@ -173,6 +206,7 @@ function drawGameOver() {
   ctx.restore();
 }
 
+// Update game state
 function update() {
   if (!selectedLine) return;
   if (gameOver) return;
@@ -215,6 +249,7 @@ function update() {
   });
 }
 
+// Draw the game frame
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // --- Draw Scrolling Background ---
@@ -276,6 +311,7 @@ function draw() {
   if (gameOver) drawGameOver();
 }
 
+// Main game loop
 function gameLoop() {
   update();
   draw();
