@@ -319,6 +319,53 @@ function createDesktopControls() {
   // For desktop, no on-screen controls needed, but you could add WASD or other UI if desired
 }
 
+function createMobileControls() {
+  let controls = document.createElement('div');
+  controls.id = 'mobile-controls';
+  controls.style.position = 'fixed';
+  controls.style.left = 0;
+  controls.style.right = 0;
+  controls.style.bottom = '0';
+  controls.style.width = '100vw';
+  controls.style.display = 'flex';
+  controls.style.justifyContent = 'space-between'; // Buttons at edges
+  controls.style.alignItems = 'flex-end';
+  controls.style.pointerEvents = 'none';
+  controls.style.zIndex = 20;
+  controls.style.background = 'transparent';
+  controls.style.height = '90px';
+  controls.style.paddingLeft = '24px'; // Padding from left edge
+  controls.style.paddingRight = '24px'; // Padding from right edge
+
+  let leftBtn = document.createElement('button');
+  leftBtn.innerText = '◀️';
+  leftBtn.style.fontSize = '40px';
+  leftBtn.style.width = '70px';
+  leftBtn.style.height = '70px';
+  leftBtn.style.borderRadius = '50%';
+  leftBtn.style.margin = '0 0 10px 0'; // Only bottom margin
+  leftBtn.style.pointerEvents = 'auto';
+  leftBtn.onclick = () => {
+    if (playerTrack > 0) playerTrack--;
+  };
+
+  let rightBtn = document.createElement('button');
+  rightBtn.innerText = '▶️';
+  rightBtn.style.fontSize = '40px';
+  rightBtn.style.width = '70px';
+  rightBtn.style.height = '70px';
+  rightBtn.style.borderRadius = '50%';
+  rightBtn.style.margin = '0 0 10px 0'; // Only bottom margin
+  rightBtn.style.pointerEvents = 'auto';
+  rightBtn.onclick = () => {
+    if (playerTrack < window.TRACKS - 1) playerTrack++;
+  };
+
+  controls.appendChild(leftBtn);
+  controls.appendChild(rightBtn);
+  document.body.appendChild(controls);
+}
+
 function setupControls() {
   // Remove any existing controls
   const oldMobile = document.getElementById('mobile-controls');
@@ -326,6 +373,8 @@ function setupControls() {
   // ...add more cleanup if you add desktop controls...
   if (!isMobile) {
     createDesktopControls();
+  } else {
+    createMobileControls();
   }
 }
 
@@ -335,17 +384,17 @@ function resizeCanvas() {
   let width = window.innerWidth;
   let height = window.innerHeight;
   if (isMobile) {
-    // Portrait: 9:16 aspect ratio, fill screen from top, leave space at bottom for controls
     if (width > height) [width, height] = [height, width];
-    let targetHeight = Math.floor(height * 0.9); // 90% of screen height
+    // Subtract controls height from available height
+    const controlsHeight = 90;
+    let targetHeight = Math.floor(height * 0.9) - controlsHeight;
     let targetWidth = width;
     if (targetHeight / width > 16 / 9) {
       targetHeight = width * 16 / 9;
     } else {
       targetWidth = targetHeight * 9 / 16;
     }
-    const controlsHeight = 90;
-    targetHeight = Math.max(targetHeight - controlsHeight, 320);
+    targetHeight = Math.max(targetHeight, 320);
     canvas.width = targetWidth * dpr;
     canvas.height = targetHeight * dpr;
     canvas.style.width = targetWidth + 'px';
